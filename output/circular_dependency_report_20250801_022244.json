@@ -1,0 +1,496 @@
+{
+  "total_cycles": 5,
+  "cycle_distribution": {
+    "simple_cycle": 2,
+    "complex_cycle": 2,
+    "self_loop": 1
+  },
+  "severity_distribution": {
+    "medium": 3,
+    "high": 1,
+    "low": 1
+  },
+  "cycles": [
+    {
+      "cycle_id": "cycle_0000",
+      "nodes": [
+        "GameManager",
+        "PlayerController",
+        "UI",
+        "GameManager"
+      ],
+      "edges": [
+        [
+          "GameManager",
+          "PlayerController"
+        ],
+        [
+          "PlayerController",
+          "UI"
+        ],
+        [
+          "UI",
+          "GameManager"
+        ]
+      ],
+      "cycle_type": "simple_cycle",
+      "severity": "medium",
+      "length": 3,
+      "detected_at": "2025-07-31T18:22:44.746331",
+      "critical_nodes": [
+        "PlayerController",
+        "GameManager",
+        "UI"
+      ],
+      "breakable_edges": [
+        [
+          "GameManager",
+          "PlayerController"
+        ],
+        [
+          "UI",
+          "GameManager"
+        ]
+      ],
+      "suggested_fixes": [
+        "考虑断开边: GameManager -> PlayerController",
+        "考虑断开边: UI -> GameManager",
+        "考虑使用依赖注入或服务定位器模式",
+        "考虑使用接口分离原则，提取公共接口",
+        "考虑使用延迟初始化或懒加载模式"
+      ],
+      "node_types": {
+        "script": 2,
+        "prefab": 1
+      },
+      "edge_strengths": {
+        "weak": 1,
+        "strong": 1,
+        "medium": 1
+      }
+    },
+    {
+      "cycle_id": "cycle_0001",
+      "nodes": [
+        "AI",
+        "Pathfinding",
+        "Navigation",
+        "CollisionSystem",
+        "Physics",
+        "Enemy",
+        "AI"
+      ],
+      "edges": [
+        [
+          "AI",
+          "Pathfinding"
+        ],
+        [
+          "Pathfinding",
+          "Navigation"
+        ],
+        [
+          "Navigation",
+          "CollisionSystem"
+        ],
+        [
+          "CollisionSystem",
+          "Physics"
+        ],
+        [
+          "Physics",
+          "Enemy"
+        ],
+        [
+          "Enemy",
+          "AI"
+        ]
+      ],
+      "cycle_type": "complex_cycle",
+      "severity": "high",
+      "length": 6,
+      "detected_at": "2025-07-31T18:22:44.746415",
+      "critical_nodes": [
+        "Navigation",
+        "AI",
+        "CollisionSystem",
+        "Pathfinding",
+        "Enemy",
+        "Physics"
+      ],
+      "breakable_edges": [
+        [
+          "Pathfinding",
+          "Navigation"
+        ]
+      ],
+      "suggested_fixes": [
+        "考虑断开边: Pathfinding -> Navigation",
+        "考虑引入中介模式或观察者模式来解耦组件",
+        "考虑使用依赖注入或服务定位器模式",
+        "考虑使用接口分离原则，提取公共接口",
+        "考虑使用延迟初始化或懒加载模式"
+      ],
+      "node_types": {
+        "script": 5,
+        "prefab": 1
+      },
+      "edge_strengths": {
+        "important": 2,
+        "medium": 2,
+        "critical": 2
+      }
+    },
+    {
+      "cycle_id": "cycle_0002",
+      "nodes": [
+        "ConfigManager",
+        "ConfigManager"
+      ],
+      "edges": [
+        [
+          "ConfigManager",
+          "ConfigManager"
+        ]
+      ],
+      "cycle_type": "self_loop",
+      "severity": "low",
+      "length": 1,
+      "detected_at": "2025-07-31T18:22:44.746439",
+      "critical_nodes": [
+        "ConfigManager"
+      ],
+      "breakable_edges": [],
+      "suggested_fixes": [
+        "移除自循环依赖"
+      ],
+      "node_types": {
+        "script": 1
+      },
+      "edge_strengths": {
+        "strong": 1
+      }
+    },
+    {
+      "cycle_id": "cycle_0003",
+      "nodes": [
+        "AudioListener",
+        "AudioManager",
+        "SoundEffect",
+        "AudioSource",
+        "AudioListener"
+      ],
+      "edges": [
+        [
+          "AudioListener",
+          "AudioManager"
+        ],
+        [
+          "AudioManager",
+          "SoundEffect"
+        ],
+        [
+          "SoundEffect",
+          "AudioSource"
+        ],
+        [
+          "AudioSource",
+          "AudioListener"
+        ]
+      ],
+      "cycle_type": "complex_cycle",
+      "severity": "medium",
+      "length": 4,
+      "detected_at": "2025-07-31T18:22:44.746484",
+      "critical_nodes": [
+        "AudioManager"
+      ],
+      "breakable_edges": [
+        [
+          "AudioListener",
+          "AudioManager"
+        ],
+        [
+          "AudioSource",
+          "AudioListener"
+        ]
+      ],
+      "suggested_fixes": [
+        "考虑断开边: AudioListener -> AudioManager",
+        "考虑断开边: AudioSource -> AudioListener",
+        "考虑使用依赖注入或服务定位器模式",
+        "考虑使用接口分离原则，提取公共接口",
+        "考虑使用延迟初始化或懒加载模式"
+      ],
+      "node_types": {
+        "component": 2,
+        "script": 1,
+        "asset": 1
+      },
+      "edge_strengths": {
+        "medium": 2,
+        "strong": 1,
+        "weak": 1
+      }
+    },
+    {
+      "cycle_id": "cycle_0004",
+      "nodes": [
+        "Equipment",
+        "Inventory",
+        "Item",
+        "Equipment"
+      ],
+      "edges": [
+        [
+          "Equipment",
+          "Inventory"
+        ],
+        [
+          "Inventory",
+          "Item"
+        ],
+        [
+          "Item",
+          "Equipment"
+        ]
+      ],
+      "cycle_type": "simple_cycle",
+      "severity": "medium",
+      "length": 3,
+      "detected_at": "2025-07-31T18:22:44.746520",
+      "critical_nodes": [
+        "Inventory"
+      ],
+      "breakable_edges": [
+        [
+          "Equipment",
+          "Inventory"
+        ]
+      ],
+      "suggested_fixes": [
+        "考虑断开边: Equipment -> Inventory",
+        "考虑使用依赖注入或服务定位器模式",
+        "考虑使用接口分离原则，提取公共接口",
+        "考虑使用延迟初始化或懒加载模式"
+      ],
+      "node_types": {
+        "scriptableobject": 2,
+        "script": 1
+      },
+      "edge_strengths": {
+        "weak": 1,
+        "strong": 1,
+        "medium": 1
+      }
+    }
+  ],
+  "affected_nodes": [
+    "AudioListener",
+    "Navigation",
+    "AI",
+    "CollisionSystem",
+    "Inventory",
+    "AudioManager",
+    "Pathfinding",
+    "GameManager",
+    "Enemy",
+    "ConfigManager",
+    "SoundEffect",
+    "AudioSource",
+    "Equipment",
+    "Physics",
+    "PlayerController",
+    "Item",
+    "UI"
+  ],
+  "hotspot_nodes": [
+    [
+      "PlayerController",
+      1
+    ],
+    [
+      "GameManager",
+      1
+    ],
+    [
+      "UI",
+      1
+    ],
+    [
+      "Navigation",
+      1
+    ],
+    [
+      "AI",
+      1
+    ],
+    [
+      "CollisionSystem",
+      1
+    ],
+    [
+      "Pathfinding",
+      1
+    ],
+    [
+      "Enemy",
+      1
+    ],
+    [
+      "Physics",
+      1
+    ],
+    [
+      "ConfigManager",
+      1
+    ]
+  ],
+  "largest_cycle": {
+    "cycle_id": "cycle_0001",
+    "nodes": [
+      "AI",
+      "Pathfinding",
+      "Navigation",
+      "CollisionSystem",
+      "Physics",
+      "Enemy",
+      "AI"
+    ],
+    "edges": [
+      [
+        "AI",
+        "Pathfinding"
+      ],
+      [
+        "Pathfinding",
+        "Navigation"
+      ],
+      [
+        "Navigation",
+        "CollisionSystem"
+      ],
+      [
+        "CollisionSystem",
+        "Physics"
+      ],
+      [
+        "Physics",
+        "Enemy"
+      ],
+      [
+        "Enemy",
+        "AI"
+      ]
+    ],
+    "cycle_type": "complex_cycle",
+    "severity": "high",
+    "length": 6,
+    "detected_at": "2025-07-31T18:22:44.746415",
+    "critical_nodes": [
+      "Navigation",
+      "AI",
+      "CollisionSystem",
+      "Pathfinding",
+      "Enemy",
+      "Physics"
+    ],
+    "breakable_edges": [
+      [
+        "Pathfinding",
+        "Navigation"
+      ]
+    ],
+    "suggested_fixes": [
+      "考虑断开边: Pathfinding -> Navigation",
+      "考虑引入中介模式或观察者模式来解耦组件",
+      "考虑使用依赖注入或服务定位器模式",
+      "考虑使用接口分离原则，提取公共接口",
+      "考虑使用延迟初始化或懒加载模式"
+    ],
+    "node_types": {
+      "script": 5,
+      "prefab": 1
+    },
+    "edge_strengths": {
+      "important": 2,
+      "medium": 2,
+      "critical": 2
+    }
+  },
+  "most_critical_cycle": {
+    "cycle_id": "cycle_0001",
+    "nodes": [
+      "AI",
+      "Pathfinding",
+      "Navigation",
+      "CollisionSystem",
+      "Physics",
+      "Enemy",
+      "AI"
+    ],
+    "edges": [
+      [
+        "AI",
+        "Pathfinding"
+      ],
+      [
+        "Pathfinding",
+        "Navigation"
+      ],
+      [
+        "Navigation",
+        "CollisionSystem"
+      ],
+      [
+        "CollisionSystem",
+        "Physics"
+      ],
+      [
+        "Physics",
+        "Enemy"
+      ],
+      [
+        "Enemy",
+        "AI"
+      ]
+    ],
+    "cycle_type": "complex_cycle",
+    "severity": "high",
+    "length": 6,
+    "detected_at": "2025-07-31T18:22:44.746415",
+    "critical_nodes": [
+      "Navigation",
+      "AI",
+      "CollisionSystem",
+      "Pathfinding",
+      "Enemy",
+      "Physics"
+    ],
+    "breakable_edges": [
+      [
+        "Pathfinding",
+        "Navigation"
+      ]
+    ],
+    "suggested_fixes": [
+      "考虑断开边: Pathfinding -> Navigation",
+      "考虑引入中介模式或观察者模式来解耦组件",
+      "考虑使用依赖注入或服务定位器模式",
+      "考虑使用接口分离原则，提取公共接口",
+      "考虑使用延迟初始化或懒加载模式"
+    ],
+    "node_types": {
+      "script": 5,
+      "prefab": 1
+    },
+    "edge_strengths": {
+      "important": 2,
+      "medium": 2,
+      "critical": 2
+    }
+  },
+  "analysis_time_seconds": 0.001459,
+  "detection_algorithm": "enhanced_scc_johnson",
+  "analyzed_at": "2025-07-31T18:22:44.746543"
+}

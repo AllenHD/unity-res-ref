@@ -1,0 +1,40 @@
+============================================================
+循环依赖分析报告
+============================================================
+分析时间: 2025-07-31 18:22:44
+检测算法: enhanced_scc_johnson
+分析耗时: 0.00 秒
+
+统计摘要:
+  总循环数: 5
+  受影响节点: 17
+
+循环类型分布:
+  CycleType.SIMPLE_CYCLE: 2
+  CycleType.COMPLEX_CYCLE: 2
+  CycleType.SELF_LOOP: 1
+
+严重程度分布:
+  CycleSeverity.MEDIUM: 3
+  CycleSeverity.HIGH: 1
+  CycleSeverity.LOW: 1
+
+热点节点 (出现在多个循环中):
+  PlayerController: 1 个循环
+  GameManager: 1 个循环
+  UI: 1 个循环
+  Navigation: 1 个循环
+  AI: 1 个循环
+
+最大循环: cycle_0001
+  长度: 6
+  节点: AI -> Pathfinding -> Navigation -> CollisionSystem -> Physics -> Enemy -> AI
+
+最严重循环: cycle_0001
+  严重程度: high
+  建议修复:
+    - 考虑断开边: Pathfinding -> Navigation
+    - 考虑引入中介模式或观察者模式来解耦组件
+    - 考虑使用依赖注入或服务定位器模式
+    - 考虑使用接口分离原则，提取公共接口
+    - 考虑使用延迟初始化或懒加载模式

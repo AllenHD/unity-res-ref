@@ -828,6 +828,115 @@ class DependencyQueryEngine(DependencyQueryMixin, ReferenceQueryMixin):
             self._cache_ttl = ttl_seconds
             self.logger.info(f"缓存TTL设置为: {ttl_seconds} 秒")
 
+    # 循环依赖分析集成方法
+    def create_circular_dependency_analyzer(self):
+        """创建循环依赖分析器实例
+        
+        Returns:
+            CircularDependencyAnalyzer: 分析器实例
+        """
+        from .circular_dependency_analyzer import CircularDependencyAnalyzer
+        return CircularDependencyAnalyzer(self)
+    
+    def get_enhanced_circular_analysis(self):
+        """获取增强的循环依赖分析
+        
+        Returns:
+            CycleAnalysisReport: 详细的循环依赖分析报告
+        """
+        analyzer = self.create_circular_dependency_analyzer()
+        return analyzer.perform_full_analysis()
+    
+    def get_incremental_circular_analysis(self, changed_nodes: Set[str], changed_edges: Set[Tuple[str, str]]):
+        """获取增量循环依赖分析
+        
+        Args:
+            changed_nodes: 变更的节点集合
+            changed_edges: 变更的边集合
+            
+        Returns:
+            CycleAnalysisReport: 增量分析报告
+        """
+        analyzer = self.create_circular_dependency_analyzer()
+        return analyzer.get_incremental_analysis(changed_nodes, changed_edges)
+    
+    # 新增的图操作方法，支持分析器
+    def get_edge_data(self, source: str, target: str) -> Optional[Dict[str, Any]]:
+        """获取边的数据
+        
+        Args:
+            source: 源节点
+            target: 目标节点
+            
+        Returns:
+            Optional[Dict[str, Any]]: 边数据，如果边不存在返回None
+        """
+        if not isinstance(self._graph, nx.DiGraph):
+            return None
+        
+        if self._graph.has_edge(source, target):
+            return self._graph[source][target]
+        return None
+    
+    def get_node_data(self, node: str) -> Optional[Dict[str, Any]]:
+        """获取节点的数据
+        
+        Args:
+            node: 节点GUID
+            
+        Returns:
+            Optional[Dict[str, Any]]: 节点数据，如果节点不存在返回None
+        """
+        if not isinstance(self._graph, nx.DiGraph):
+            return None
+        
+        if node in self._graph:
+            return self._graph.nodes[node]
+        return None
+    
+    def has_edge(self, source: str, target: str) -> bool:
+        """检查是否存在边
+        
+        Args:
+            source: 源节点
+            target: 目标节点
+            
+        Returns:
+            bool: 如果边存在返回True
+        """
+        if not isinstance(self._graph, nx.DiGraph):
+            return False
+        return self._graph.has_edge(source, target)
+    
+    def get_node_count(self) -> int:
+        """获取节点数量
+        
+        Returns:
+            int: 节点数量
+        """
+        if not isinstance(self._graph, nx.DiGraph):
+            return 0
+        return self._graph.number_of_nodes()
+    
+    def get_edge_count(self) -> int:
+        """获取边数量
+        
+        Returns:
+            int: 边数量
+        """
+        if not isinstance(self._graph, nx.DiGraph):
+            return 0
+        return self._graph.number_of_edges()
+    
+    @property
+    def graph(self) -> nx.DiGraph:
+        """获取底层NetworkX图对象
+        
+        Returns:
+            nx.DiGraph: NetworkX有向图
+        """
+        return self._graph
+
 
 # 保持向后兼容性的导出
 __all__ = [
