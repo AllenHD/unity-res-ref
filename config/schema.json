@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Unity Resource Reference Scanner Configuration",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "unity_project_path": {"type": "string"},
+        "unity_version": {"type": "string"}
+      },
+      "required": ["name"]
+    },
+    "scan": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "exclude_paths": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "file_extensions": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "max_file_size_mb": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "ignore_hidden_files": {"type": "boolean"}
+      },
+      "required": ["paths", "file_extensions"]
+    },
+    "database": {
+      "type": "object",
+      "properties": {
+        "type": {"type": "string", "enum": ["sqlite"]},
+        "path": {"type": "string"},
+        "backup_enabled": {"type": "boolean"},
+        "backup_interval_hours": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "vacuum_on_startup": {"type": "boolean"}
+      },
+      "required": ["type", "path"]
+    },
+    "performance": {
+      "type": "object",
+      "properties": {
+        "max_workers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "batch_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "memory_limit_mb": {
+          "type": "integer",
+          "minimum": 128
+        },
+        "enable_async_io": {"type": "boolean"},
+        "cache_size_mb": {
+          "type": "integer",
+          "minimum": 32
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "verbosity": {
+          "type": "string",
+          "enum": ["debug", "info", "warning", "error"]
+        },
+        "progress_bar": {"type": "boolean"},
+        "color_output": {"type": "boolean"},
+        "export_formats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["json", "csv", "dot", "html"]
+          }
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "detect_unused_assets": {"type": "boolean"},
+        "detect_circular_deps": {"type": "boolean"},
+        "generate_reports": {"type": "boolean"},
+        "web_interface": {"type": "boolean"}
+      }
+    }
+  },
+  "required": ["project", "scan", "database"]
+}

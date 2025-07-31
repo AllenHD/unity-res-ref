@@ -1,0 +1,55 @@
+# Unity Resource Reference Scanner - Default Configuration
+
+project:
+  name: "Unity Project Scanner"
+  unity_project_path: ""                   # Unity项目根路径
+  unity_version: ""                        # Unity版本(自动检测)
+
+scan:
+  paths:                                   # 扫描路径
+    - "Assets/"
+    - "Packages/"
+  exclude_paths:                          # 排除路径
+    - "Assets/StreamingAssets/"
+    - "Assets/Plugins/Android/"
+    - "Assets/Plugins/iOS/"
+    - "Library/"
+    - "Temp/"
+    - "Build/"
+    - "Logs/"
+  file_extensions:                        # 扫描的文件类型
+    - ".prefab"
+    - ".scene"
+    - ".asset"
+    - ".mat"
+    - ".controller"
+    - ".anim"
+    - ".cs"                             # C#脚本(分析ScriptableObject)
+  max_file_size_mb: 50                   # 最大文件大小限制
+  ignore_hidden_files: true             # 忽略隐藏文件
+
+database:
+  type: "sqlite"                         # 数据库类型
+  path: "./unity_deps.db"               # 数据库路径
+  backup_enabled: true                  # 是否自动备份
+  backup_interval_hours: 24             # 备份间隔
+  vacuum_on_startup: false              # 启动时是否压缩数据库
+
+performance:
+  max_workers: 4                        # 最大工作线程数
+  batch_size: 100                       # 批处理大小
+  memory_limit_mb: 512                  # 内存使用限制
+  enable_async_io: true                 # 启用异步I/O
+  cache_size_mb: 128                    # 解析缓存大小
+
+output:
+  verbosity: "info"                     # 日志级别
+  progress_bar: true                    # 显示进度条
+  color_output: true                    # 彩色输出
+  export_formats: ["json", "csv", "dot"] # 支持的导出格式
+
+features:
+  detect_unused_assets: true            # 检测未使用资源
+  detect_circular_deps: true            # 检测循环依赖
+  generate_reports: true                # 生成报告
+  web_interface: false                  # Web界面(可选)
