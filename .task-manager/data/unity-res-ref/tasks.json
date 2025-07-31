@@ -111,14 +111,14 @@
       "name": "被引用关系查询实现",
       "description": "实现反向依赖查询功能，查找指定资源被哪些其他资源引用。通过反向图遍历算法，提供直接被引用、间接被引用、影响范围分析等功能。支持被引用关系的深度分析和统计，为资源重构和删除提供决策支持。",
       "notes": "利用NetworkX的反向图遍历能力。与依赖查询共享缓存机制。提供引用关系的可视化数据支持。考虑大型项目中引用关系的复杂性。",
-      "status": "pending",
+      "status": "completed",
       "dependencies": [
         {
           "taskId": "82f39cbf-ede2-408d-937d-0c090f070c30"
         }
       ],
       "createdAt": "2025-07-31T16:30:38.309Z",
-      "updatedAt": "2025-07-31T16:30:38.309Z",
+      "updatedAt": "2025-07-31T17:26:47.255Z",
       "relatedFiles": [
         {
           "path": "src/core/dependency_graph.py",
@@ -128,7 +128,9 @@
       ],
       "implementationGuide": "1. 扩展DependencyQueryEngine，添加反向查询功能\\n2. 实现get_direct_references()：获取直接引用该资源的其他资源\\n3. 实现get_all_references()：使用反向DFS获取所有引用源\\n4. 实现get_impact_analysis()：分析删除/修改资源的影响范围\\n5. 添加引用强度分析：统计不同类型引用的数量和重要性\\n6. 实现引用树构建：build_reference_tree()，展示引用层次结构\\n7. 添加引用路径查询：找到从引用源到目标资源的路径\\n8. 提供引用统计：被引用次数、引用深度、引用类型分布\\n9. 实现引用验证：检查引用关系的有效性和一致性",
       "verificationCriteria": "反向查询算法正确，被引用关系准确，影响范围分析功能正常，引用统计数据准确，引用验证机制有效，查询性能满足要求",
-      "analysisResult": "构建完整的Unity项目依赖关系图管理系统，基于NetworkX图库和现有数据模型，提供高效的图构建、查询、更新和分析功能。核心目标是从数据库中的Asset和Dependency数据构建内存图结构，支持依赖查询、被引用分析、循环依赖检测等关键功能，并提供增量更新机制以提升大型项目的处理性能。"
+      "analysisResult": "构建完整的Unity项目依赖关系图管理系统，基于NetworkX图库和现有数据模型，提供高效的图构建、查询、更新和分析功能。核心目标是从数据库中的Asset和Dependency数据构建内存图结构，支持依赖查询、被引用分析、循环依赖检测等关键功能，并提供增量更新机制以提升大型项目的处理性能。",
+      "summary": "被引用关系查询功能已成功实现，扩展了DependencyQueryEngine类，新增8个核心查询方法。核心功能包括：1) 直接引用查询：get_direct_references()获取直接引用指定资源的其他资源；2) 全量引用查询：get_all_references()使用反向DFS遍历所有引用源；3) 影响范围分析：get_impact_analysis()分析删除/修改资源的影响，支持不同分析类型（删除、修改、移动）；4) 引用树构建：build_reference_tree()生成层次化引用结构；5) 引用强度分析：get_reference_strength_analysis()统计不同强度引用的分布和重要性评分；6) 引用路径查询：get_reference_path()查找引用源到目标的路径；7) 引用验证：validate_references()检查引用关系的有效性和一致性；8) 批量引用查询：batch_reference_query()支持多资源并行查询。所有功能集成了缓存机制、错误处理和详细统计，测试验证了反向查询算法正确性、引用树构建、影响分析和批量处理能力，为Unity资源重构和删除决策提供了强大支持。",
+      "completedAt": "2025-07-31T17:26:47.253Z"
     },
     {
       "id": "0cd6043c-f073-4f64-8cef-ae6703992be4",
