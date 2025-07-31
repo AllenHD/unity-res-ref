@@ -5,6 +5,8 @@
 
 from .base_parser import BaseParser, ParseResult, ParseResultType
 from .meta_parser import MetaParser, MetaFileInfo, ImporterType
+from .prefab_parser import PrefabParser, create_prefab_parser
+from .scene_parser import SceneParser, create_scene_parser
 
 __all__ = [
     "BaseParser",
@@ -13,4 +15,8 @@ __all__ = [
     "MetaParser",
     "MetaFileInfo",
     "ImporterType",
+    "PrefabParser",
+    "create_prefab_parser",
+    "SceneParser",
+    "create_scene_parser",
 ]

@@ -9,6 +9,7 @@ from pathlib import Path
 from dataclasses import dataclass
 import logging
 from enum import Enum
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -242,3 +243,111 @@ class BaseParser(ABC):
             "supported_extensions": self.get_supported_extensions(),
             "strict_mode": self.strict_mode
         }
+    
+    def _parse_unity_yaml(self, content: str) -> List[Dict[str, Any]]:
+        """解析Unity YAML格式内容
+        
+        Unity使用特殊的YAML格式，包含文档分隔符和类型标识符。
+        
+        Args:
+            content: YAML文件内容
+            
+        Returns:
+            解析出的文档列表
+        """
+        documents = []
+        
+        # Unity YAML文档分隔符模式 - 匹配 "--- !u!123 &456"
+        doc_pattern = r'--- !u!(\d+) &(\d+)'
+        
+        # 找到所有文档分隔符的位置
+        lines = content.split('\n')
+        doc_starts = []
+        
+        for i, line in enumerate(lines):
+            if re.match(doc_pattern, line.strip()):
+                match = re.match(doc_pattern, line.strip())
+                if match:
+                    doc_starts.append({
+                        'line_index': i,
+                        'class_id': match.group(1),
+                        'file_id': match.group(2)
+                    })
+        
+        # 解析每个文档
+        for i, doc_start in enumerate(doc_starts):
+            start_line = doc_start['line_index'] + 1  # 跳过分隔符行
+            
+            # 确定文档结束位置
+            if i < len(doc_starts) - 1:
+                end_line = doc_starts[i + 1]['line_index']
+            else:
+                end_line = len(lines)
+            
+            # 提取文档内容
+            doc_lines = lines[start_line:end_line]
+            doc_content = '\n'.join(doc_lines)
+            
+            # 解析文档内容
+            doc_data = self._parse_yaml_content(doc_content)
+            
+            if doc_data:
+                doc_data['_unity_class_id'] = doc_start['class_id']
+                doc_data['_unity_file_id'] = doc_start['file_id']
+                documents.append(doc_data)
+        
+        return documents
+    
+    def _parse_yaml_content(self, content: str) -> Optional[Dict[str, Any]]:
+        """解析YAML内容为字典
+        
+        简化的YAML解析，主要用于提取键值对。
+        
+        Args:
+            content: YAML内容
+            
+        Returns:
+            解析的字典数据
+        """
+        try:
+            data = {}
+            lines = content.split('\n')
+            current_key = None
+            current_value = []
+            indent_level = 0
+            
+            for line in lines:
+                if not line.strip():
+                    continue
+                    
+                # 检测缩进
+                line_indent = len(line) - len(line.lstrip())
+                
+                # 简单的键值对匹配
+                if ':' in line and not line.strip().startswith('-'):
+                    if current_key and current_value:
+                        data[current_key] = '\n'.join(current_value).strip()
+                        current_value = []
+                    
+                    key, value = line.split(':', 1)
+                    key = key.strip()
+                    value = value.strip()
+                    
+                    if value:
+                        data[key] = value
+                    else:
+                        current_key = key
+                        indent_level = line_indent
+                else:
+                    if current_key:
+                        current_value.append(line)
+            
+            # 处理最后一个键值对
+            if current_key and current_value:
+                data[current_key] = '\n'.join(current_value).strip()
+            
+            return data if data else None
+            
+        except Exception as e:
+            logger.error(f"解析YAML内容时出错: {e}")
+            return None
