@@ -1168,3 +1168,619 @@ class DependencyGraphBuilder:
         if memory_limit_mb > 0:
             self.memory_limit_mb = memory_limit_mb
             self.logger.info(f"内存限制设置为: {memory_limit_mb} MB")
+
+
+class QueryOptions:
+    """查询选项配置类"""
+    
+    def __init__(
+        self,
+        max_depth: Optional[int] = None,
+        dependency_types: Optional[List[str]] = None,
+        strength_threshold: Optional[str] = None,
+        include_inactive: bool = False,
+        include_unverified: bool = True
+    ):
+        """初始化查询选项
+        
+        Args:
+            max_depth: 最大查询深度，None表示无限制
+            dependency_types: 依赖类型过滤列表
+            strength_threshold: 依赖强度阈值
+            include_inactive: 是否包含非活跃依赖
+            include_unverified: 是否包含未验证依赖
+        """
+        self.max_depth = max_depth
+        self.dependency_types = dependency_types or []
+        self.strength_threshold = strength_threshold
+        self.include_inactive = include_inactive
+        self.include_unverified = include_unverified
+    
+    def should_include_edge(self, edge_data: Dict[str, Any]) -> bool:
+        """判断边是否应该包含在查询结果中
+        
+        Args:
+            edge_data: 边的数据
+            
+        Returns:
+            bool: 是否包含
+        """
+        # 检查活跃状态
+        if not self.include_inactive and not edge_data.get('is_active', True):
+            return False
+        
+        # 检查验证状态
+        if not self.include_unverified and not edge_data.get('is_verified', True):
+            return False
+        
+        # 检查依赖类型
+        if self.dependency_types:
+            dep_type = edge_data.get('dependency_type')
+            if dep_type not in self.dependency_types:
+                return False
+        
+        # 检查依赖强度
+        if self.strength_threshold:
+            strength = edge_data.get('dependency_strength', 'optional')
+            strength_order = {
+                'weak': 0,
+                'optional': 1,
+                'important': 2,
+                'critical': 3
+            }
+            
+            current_level = strength_order.get(strength, 0)
+            threshold_level = strength_order.get(self.strength_threshold, 0)
+            
+            if current_level < threshold_level:
+                return False
+        
+        return True
+
+
+class QueryResult:
+    """查询结果数据结构"""
+    
+    def __init__(self, query_type: str, source_guid: str, target_guid: Optional[str] = None):
+        """初始化查询结果
+        
+        Args:
+            query_type: 查询类型
+            source_guid: 源资源GUID
+            target_guid: 目标资源GUID（可选）
+        """
+        self.query_type = query_type
+        self.source_guid = source_guid
+        self.target_guid = target_guid
+        self.timestamp = datetime.utcnow()
+        
+        # 查询结果数据
+        self.dependencies: List[str] = []
+        self.paths: List[List[str]] = []
+        self.tree: Optional[Dict[str, Any]] = None
+        self.statistics: Dict[str, Any] = {}
+        
+        # 元数据
+        self.metadata: Dict[str, Any] = {}
+    
+    def add_dependency(self, guid: str) -> None:
+        """添加依赖资源
+        
+        Args:
+            guid: 资源GUID
+        """
+        if guid not in self.dependencies:
+            self.dependencies.append(guid)
+    
+    def add_path(self, path: List[str]) -> None:
+        """添加依赖路径
+        
+        Args:
+            path: 依赖路径
+        """
+        if path not in self.paths:
+            self.paths.append(path)
+    
+    def set_tree(self, tree: Dict[str, Any]) -> None:
+        """设置依赖树
+        
+        Args:
+            tree: 依赖树结构
+        """
+        self.tree = tree
+    
+    def add_statistic(self, key: str, value: Any) -> None:
+        """添加统计信息
+        
+        Args:
+            key: 统计键
+            value: 统计值
+        """
+        self.statistics[key] = value
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """转换为字典格式
+        
+        Returns:
+            Dict[str, Any]: 结果字典
+        """
+        return {
+            'query_type': self.query_type,
+            'source_guid': self.source_guid,
+            'target_guid': self.target_guid,
+            'timestamp': self.timestamp.isoformat(),
+            'dependencies': self.dependencies,
+            'paths': self.paths,
+            'tree': self.tree,
+            'statistics': self.statistics,
+            'metadata': self.metadata
+        }
+
+
+class DependencyQueryEngine:
+    """依赖查询引擎
+    
+    基于图遍历算法提供多种依赖查询模式，包括直接依赖、间接依赖、传递依赖等。
+    支持查询深度限制、路径追踪、结果过滤等高级功能。
+    """
+    
+    def __init__(self, graph: DependencyGraph):
+        """初始化查询引擎
+        
+        Args:
+            graph: 依赖关系图
+        """
+        self.graph = graph
+        
+        # 查询结果缓存
+        self._cache: Dict[str, QueryResult] = {}
+        self._cache_ttl = 300  # 缓存5分钟
+        self._cache_timestamps: Dict[str, datetime] = {}
+        self._cache_lock = threading.Lock()
+        
+        # 日志记录器
+        self.logger = logging.getLogger(__name__)
+    
+    def get_direct_dependencies(
+        self, 
+        source_guid: str, 
+        options: Optional[QueryOptions] = None
+    ) -> QueryResult:
+        """获取资源的直接依赖
+        
+        Args:
+            source_guid: 源资源GUID
+            options: 查询选项
+            
+        Returns:
+            QueryResult: 查询结果
+        """
+        self.logger.debug(f"查询直接依赖: {source_guid}")
+        
+        # 检查缓存
+        cache_key = f"direct_{source_guid}_{hash(str(options.__dict__) if options else 'default')}"
+        cached_result = self._get_cached_result(cache_key)
+        if cached_result:
+            return cached_result
+        
+        result = QueryResult('direct_dependencies', source_guid)
+        options = options or QueryOptions()
+        
+        try:
+            if not self.graph.has_node(source_guid):
+                self.logger.warning(f"源资源不存在: {source_guid}")
+                result.add_statistic('error', f'Source node {source_guid} not found')
+                return result
+            
+            # 获取直接后继节点
+            successors = self.graph.get_successors(source_guid)
+            
+            for successor in successors:
+                edge_data = self.graph.get_edge_data(source_guid, successor)
+                
+                # 应用过滤条件
+                if edge_data and options.should_include_edge(edge_data):
+                    result.add_dependency(successor)
+                    result.add_path([source_guid, successor])
+            
+            # 添加统计信息
+            result.add_statistic('direct_count', len(result.dependencies))
+            result.add_statistic('paths_count', len(result.paths))
+            
+            # 缓存结果
+            self._cache_result(cache_key, result)
+            
+        except Exception as e:
+            self.logger.error(f"查询直接依赖失败 {source_guid}: {e}")
+            result.add_statistic('error', str(e))
+        
+        return result
+    
+    def get_all_dependencies(
+        self,
+        source_guid: str,
+        options: Optional[QueryOptions] = None
+    ) -> QueryResult:
+        """获取资源的所有间接依赖（使用DFS遍历）
+        
+        Args:
+            source_guid: 源资源GUID
+            options: 查询选项
+            
+        Returns:
+            QueryResult: 查询结果
+        """
+        self.logger.debug(f"查询所有依赖: {source_guid}")
+        
+        # 检查缓存
+        cache_key = f"all_{source_guid}_{hash(str(options.__dict__) if options else 'default')}"
+        cached_result = self._get_cached_result(cache_key)
+        if cached_result:
+            return cached_result
+        
+        result = QueryResult('all_dependencies', source_guid)
+        options = options or QueryOptions()
+        
+        try:
+            if not self.graph.has_node(source_guid):
+                self.logger.warning(f"源资源不存在: {source_guid}")
+                result.add_statistic('error', f'Source node {source_guid} not found')
+                return result
+            
+            # 使用DFS遍历所有依赖
+            visited = set()
+            depth_map = {}
+            
+            def dfs(node: str, current_depth: int, path: List[str]) -> None:
+                if options.max_depth and current_depth > options.max_depth:
+                    return
+                
+                if node in visited:
+                    return
+                
+                visited.add(node)
+                depth_map[node] = current_depth
+                
+                if node != source_guid:
+                    result.add_dependency(node)
+                    result.add_path(path.copy())
+                
+                # 遍历后继节点
+                for successor in self.graph.get_successors(node):
+                    edge_data = self.graph.get_edge_data(node, successor)
+                    
+                    if edge_data and options.should_include_edge(edge_data):
+                        new_path = path + [successor]
+                        dfs(successor, current_depth + 1, new_path)
+            
+            # 开始DFS遍历
+            dfs(source_guid, 0, [source_guid])
+            
+            # 添加统计信息
+            result.add_statistic('total_count', len(result.dependencies))
+            result.add_statistic('max_depth', max(depth_map.values()) if depth_map else 0)
+            result.add_statistic('paths_count', len(result.paths))
+            result.add_statistic('depth_distribution', self._calculate_depth_distribution(depth_map))
+            
+            # 缓存结果
+            self._cache_result(cache_key, result)
+            
+        except Exception as e:
+            self.logger.error(f"查询所有依赖失败 {source_guid}: {e}")
+            result.add_statistic('error', str(e))
+        
+        return result
+    
+    def get_dependency_path(
+        self,
+        source_guid: str,
+        target_guid: str,
+        options: Optional[QueryOptions] = None
+    ) -> QueryResult:
+        """查找两个资源间的依赖路径
+        
+        Args:
+            source_guid: 源资源GUID
+            target_guid: 目标资源GUID
+            options: 查询选项
+            
+        Returns:
+            QueryResult: 查询结果
+        """
+        self.logger.debug(f"查询依赖路径: {source_guid} -> {target_guid}")
+        
+        result = QueryResult('dependency_path', source_guid, target_guid)
+        options = options or QueryOptions()
+        
+        try:
+            if not self.graph.has_node(source_guid) or not self.graph.has_node(target_guid):
+                error_msg = f"节点不存在: source={source_guid}, target={target_guid}"
+                self.logger.warning(error_msg)
+                result.add_statistic('error', error_msg)
+                return result
+            
+            # 使用NetworkX的shortest_path查找最短路径
+            try:
+                # 创建过滤后的子图
+                filtered_edges = []
+                for source, target, data in self.graph.graph.edges(data=True):
+                    if options.should_include_edge(data):
+                        filtered_edges.append((source, target))
+                
+                subgraph = self.graph.graph.edge_subgraph(filtered_edges)
+                
+                # 查找最短路径
+                if nx.has_path(subgraph, source_guid, target_guid):
+                    shortest_path = nx.shortest_path(subgraph, source_guid, target_guid)
+                    result.add_path(shortest_path)
+                    
+                    # 查找所有简单路径（限制数量避免性能问题）
+                    try:
+                        all_paths = list(nx.all_simple_paths(
+                            subgraph, 
+                            source_guid, 
+                            target_guid,
+                            cutoff=options.max_depth or 10
+                        ))
+                        
+                        # 限制路径数量
+                        if len(all_paths) > 100:
+                            all_paths = all_paths[:100]
+                            result.add_statistic('paths_truncated', True)
+                        
+                        for path in all_paths:
+                            result.add_path(path)
+                    
+                    except Exception as e:
+                        self.logger.warning(f"查找所有路径失败: {e}")
+                
+                else:
+                    result.add_statistic('path_exists', False)
+            
+            except nx.NetworkXNoPath:
+                result.add_statistic('path_exists', False)
+            
+            # 添加统计信息
+            result.add_statistic('paths_found', len(result.paths))
+            if result.paths:
+                path_lengths = [len(path) - 1 for path in result.paths]  # 减1因为路径长度是边数
+                result.add_statistic('shortest_path_length', min(path_lengths))
+                result.add_statistic('longest_path_length', max(path_lengths))
+                result.add_statistic('average_path_length', sum(path_lengths) / len(path_lengths))
+            
+        except Exception as e:
+            self.logger.error(f"查询依赖路径失败 {source_guid} -> {target_guid}: {e}")
+            result.add_statistic('error', str(e))
+        
+        return result
+    
+    def build_dependency_tree(
+        self,
+        source_guid: str,
+        options: Optional[QueryOptions] = None
+    ) -> QueryResult:
+        """构建依赖树结构
+        
+        Args:
+            source_guid: 源资源GUID
+            options: 查询选项
+            
+        Returns:
+            QueryResult: 包含树结构的查询结果
+        """
+        self.logger.debug(f"构建依赖树: {source_guid}")
+        
+        result = QueryResult('dependency_tree', source_guid)
+        options = options or QueryOptions()
+        
+        try:
+            if not self.graph.has_node(source_guid):
+                self.logger.warning(f"源资源不存在: {source_guid}")
+                result.add_statistic('error', f'Source node {source_guid} not found')
+                return result
+            
+            def build_tree_recursive(node: str, current_depth: int, visited: Set[str]) -> Dict[str, Any]:
+                """递归构建树结构"""
+                if options.max_depth and current_depth > options.max_depth:
+                    return {'guid': node, 'children': [], 'truncated': True}
+                
+                if node in visited:
+                    return {'guid': node, 'children': [], 'circular': True}
+                
+                visited_copy = visited.copy()
+                visited_copy.add(node)
+                
+                # 获取节点数据
+                node_data = self.graph.get_node_data(node) or {}
+                
+                tree_node = {
+                    'guid': node,
+                    'asset_type': node_data.get('asset_type'),
+                    'file_path': node_data.get('file_path'),
+                    'depth': current_depth,
+                    'children': []
+                }
+                
+                # 获取直接依赖
+                for successor in self.graph.get_successors(node):
+                    edge_data = self.graph.get_edge_data(node, successor)
+                    
+                    if edge_data and options.should_include_edge(edge_data):
+                        child_tree = build_tree_recursive(successor, current_depth + 1, visited_copy)
+                        
+                        # 添加边信息
+                        child_tree['edge_info'] = {
+                            'dependency_type': edge_data.get('dependency_type'),
+                            'dependency_strength': edge_data.get('dependency_strength'),
+                            'context_path': edge_data.get('context_path')
+                        }
+                        
+                        tree_node['children'].append(child_tree)
+                
+                return tree_node
+            
+            # 构建树
+            tree = build_tree_recursive(source_guid, 0, set())
+            result.set_tree(tree)
+            
+            # 计算统计信息
+            def count_nodes(tree_node: Dict[str, Any]) -> Tuple[int, int]:
+                """计算节点数和最大深度"""
+                node_count = 1
+                max_depth = tree_node.get('depth', 0)
+                
+                for child in tree_node.get('children', []):
+                    child_count, child_depth = count_nodes(child)
+                    node_count += child_count
+                    max_depth = max(max_depth, child_depth)
+                
+                return node_count, max_depth
+            
+            total_nodes, max_depth = count_nodes(tree)
+            result.add_statistic('total_nodes', total_nodes)
+            result.add_statistic('max_depth', max_depth)
+            result.add_statistic('direct_children', len(tree.get('children', [])))
+            
+        except Exception as e:
+            self.logger.error(f"构建依赖树失败 {source_guid}: {e}")
+            result.add_statistic('error', str(e))
+        
+        return result
+    
+    def batch_query_dependencies(
+        self,
+        source_guids: List[str],
+        query_type: str = 'direct',
+        options: Optional[QueryOptions] = None
+    ) -> Dict[str, QueryResult]:
+        """批量查询多个资源的依赖关系
+        
+        Args:
+            source_guids: 源资源GUID列表
+            query_type: 查询类型 ('direct', 'all', 'tree')
+            options: 查询选项
+            
+        Returns:
+            Dict[str, QueryResult]: 查询结果字典
+        """
+        self.logger.info(f"批量查询依赖: {len(source_guids)} 个资源, 类型: {query_type}")
+        
+        results = {}
+        
+        for guid in source_guids:
+            try:
+                if query_type == 'direct':
+                    result = self.get_direct_dependencies(guid, options)
+                elif query_type == 'all':
+                    result = self.get_all_dependencies(guid, options)
+                elif query_type == 'tree':
+                    result = self.build_dependency_tree(guid, options)
+                else:
+                    result = QueryResult(f'unknown_{query_type}', guid)
+                    result.add_statistic('error', f'Unknown query type: {query_type}')
+                
+                results[guid] = result
+                
+            except Exception as e:
+                self.logger.error(f"批量查询失败 {guid}: {e}")
+                error_result = QueryResult(f'batch_{query_type}', guid)
+                error_result.add_statistic('error', str(e))
+                results[guid] = error_result
+        
+        return results
+    
+    def _get_cached_result(self, cache_key: str) -> Optional[QueryResult]:
+        """获取缓存结果
+        
+        Args:
+            cache_key: 缓存键
+            
+        Returns:
+            Optional[QueryResult]: 缓存的结果，如果不存在或过期则返回None
+        """
+        with self._cache_lock:
+            if cache_key not in self._cache:
+                return None
+            
+            # 检查缓存是否过期
+            timestamp = self._cache_timestamps.get(cache_key)
+            if timestamp and (datetime.utcnow() - timestamp).total_seconds() > self._cache_ttl:
+                del self._cache[cache_key]
+                del self._cache_timestamps[cache_key]
+                return None
+            
+            return self._cache[cache_key]
+    
+    def _cache_result(self, cache_key: str, result: QueryResult) -> None:
+        """缓存查询结果
+        
+        Args:
+            cache_key: 缓存键
+            result: 查询结果
+        """
+        with self._cache_lock:
+            self._cache[cache_key] = result
+            self._cache_timestamps[cache_key] = datetime.utcnow()
+            
+            # 清理过期缓存
+            self._cleanup_expired_cache()
+    
+    def _cleanup_expired_cache(self) -> None:
+        """清理过期的缓存项"""
+        current_time = datetime.utcnow()
+        expired_keys = []
+        
+        for key, timestamp in self._cache_timestamps.items():
+            if (current_time - timestamp).total_seconds() > self._cache_ttl:
+                expired_keys.append(key)
+        
+        for key in expired_keys:
+            if key in self._cache:
+                del self._cache[key]
+            if key in self._cache_timestamps:
+                del self._cache_timestamps[key]
+    
+    def _calculate_depth_distribution(self, depth_map: Dict[str, int]) -> Dict[int, int]:
+        """计算深度分布
+        
+        Args:
+            depth_map: 深度映射
+            
+        Returns:
+            Dict[int, int]: 深度分布统计
+        """
+        distribution = defaultdict(int)
+        for depth in depth_map.values():
+            distribution[depth] += 1
+        return dict(distribution)
+    
+    def clear_cache(self) -> None:
+        """清空查询缓存"""
+        with self._cache_lock:
+            self._cache.clear()
+            self._cache_timestamps.clear()
+            self.logger.info("查询缓存已清空")
+    
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """获取缓存统计信息
+        
+        Returns:
+            Dict[str, Any]: 缓存统计
+        """
+        with self._cache_lock:
+            return {
+                'cache_size': len(self._cache),
+                'cache_ttl_seconds': self._cache_ttl,
+                'oldest_entry': min(self._cache_timestamps.values()) if self._cache_timestamps else None,
+                'newest_entry': max(self._cache_timestamps.values()) if self._cache_timestamps else None
+            }
+    
+    def set_cache_ttl(self, ttl_seconds: int) -> None:
+        """设置缓存TTL
+        
+        Args:
+            ttl_seconds: 缓存时间（秒）
+        """
+        if ttl_seconds > 0:
+            self._cache_ttl = ttl_seconds
+            self.logger.info(f"缓存TTL设置为: {ttl_seconds} 秒")

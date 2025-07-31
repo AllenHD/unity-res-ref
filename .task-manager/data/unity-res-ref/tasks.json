@@ -80,14 +80,14 @@
       "name": "依赖查询算法实现",
       "description": "实现基于图遍历的依赖查询算法，提供直接依赖、间接依赖、传递依赖等多种查询模式。使用深度优先搜索(DFS)算法遍历依赖树，支持查询深度限制、路径追踪、结果过滤等高级功能。为CLI和API提供友好的查询接口。",
       "notes": "使用NetworkX的图遍历算法提升性能。实现查询结果缓存以优化重复查询。支持异步查询模式，避免阻塞主线程。提供清晰的查询结果数据结构。",
-      "status": "pending",
+      "status": "completed",
       "dependencies": [
         {
           "taskId": "ba310a14-fd6e-4875-9cbf-d04d00e450ca"
         }
       ],
       "createdAt": "2025-07-31T16:30:38.309Z",
-      "updatedAt": "2025-07-31T16:30:38.309Z",
+      "updatedAt": "2025-07-31T17:06:34.904Z",
       "relatedFiles": [
         {
           "path": "src/core/dependency_graph.py",
@@ -102,7 +102,9 @@
       ],
       "implementationGuide": "1. 创建DependencyQueryEngine类，负责各种依赖查询\\n2. 实现get_direct_dependencies()：获取资源的直接依赖\\n3. 实现get_all_dependencies()：使用DFS获取所有间接依赖\\n4. 实现get_dependency_path()：查找两个资源间的依赖路径\\n5. 添加查询选项：深度限制、依赖类型过滤、强度阈值\\n6. 实现依赖树构建：build_dependency_tree()，支持树形结构输出\\n7. 添加查询结果缓存机制，提升重复查询性能\\n8. 实现批量查询：支持多个资源的并行依赖分析\\n9. 提供查询统计：依赖深度、路径长度、节点数量等",
       "verificationCriteria": "依赖查询算法正确准确，DFS遍历功能正常，查询选项和过滤器工作正确，缓存机制有效，批量查询性能良好，查询结果数据结构清晰",
-      "analysisResult": "构建完整的Unity项目依赖关系图管理系统，基于NetworkX图库和现有数据模型，提供高效的图构建、查询、更新和分析功能。核心目标是从数据库中的Asset和Dependency数据构建内存图结构，支持依赖查询、被引用分析、循环依赖检测等关键功能，并提供增量更新机制以提升大型项目的处理性能。"
+      "analysisResult": "构建完整的Unity项目依赖关系图管理系统，基于NetworkX图库和现有数据模型，提供高效的图构建、查询、更新和分析功能。核心目标是从数据库中的Asset和Dependency数据构建内存图结构，支持依赖查询、被引用分析、循环依赖检测等关键功能，并提供增量更新机制以提升大型项目的处理性能。",
+      "summary": "依赖查询算法实现任务已成功完成，创建了完整的DependencyQueryEngine类和相关支持类。核心功能包括：1) 查询选项系统：QueryOptions类支持深度限制、类型过滤、强度阈值等多种过滤条件；2) 查询结果封装：QueryResult类提供统一的结果数据结构，包含依赖列表、路径信息、树结构和统计数据；3) 直接依赖查询：get_direct_dependencies()获取资源的直接依赖关系；4) 全量依赖查询：get_all_dependencies()使用DFS算法遍历所有间接依赖；5) 路径查询：get_dependency_path()查找两个资源间的依赖路径，支持最短路径和所有简单路径；6) 依赖树构建：build_dependency_tree()生成完整的树形结构，支持循环检测和深度限制；7) 批量查询：batch_query_dependencies()支持多资源并行查询；8) 缓存机制：实现线程安全的查询结果缓存，支持TTL和自动清理；9) 统计分析：提供详细的查询统计信息，包括深度分布、路径长度等指标。实现了高性能的图遍历算法，支持复杂的过滤条件，完全满足Unity项目依赖分析的查询需求。",
+      "completedAt": "2025-07-31T17:06:34.902Z"
     },
     {
       "id": "dcfb617b-44b2-4045-b545-6710db711634",
