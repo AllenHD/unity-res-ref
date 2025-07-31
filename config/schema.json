@@ -1,54 +1,101 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Unity Resource Reference Scanner Configuration",
+  "title": "Unity Resource Reference Scanner Configuration Schema",
+  "description": "配置文件的JSON Schema验证规则",
   "type": "object",
   "properties": {
     "project": {
       "type": "object",
       "properties": {
-        "name": {"type": "string"},
-        "unity_project_path": {"type": "string"},
-        "unity_version": {"type": "string"}
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "项目名称"
+        },
+        "unity_project_path": {
+          "type": "string",
+          "description": "Unity项目根路径"
+        },
+        "unity_version": {
+          "type": ["string", "null"],
+          "pattern": "^\\d+\\.\\d+(\\.\\d+)?(f\\d+)?$",
+          "description": "Unity版本号"
+        }
       },
-      "required": ["name"]
+      "required": ["name"],
+      "additionalProperties": false
     },
     "scan": {
       "type": "object",
       "properties": {
         "paths": {
           "type": "array",
-          "items": {"type": "string"}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "description": "扫描路径列表"
         },
         "exclude_paths": {
           "type": "array",
-          "items": {"type": "string"}
+          "items": {
+            "type": "string"
+          },
+          "description": "排除路径列表"
         },
         "file_extensions": {
           "type": "array",
-          "items": {"type": "string"}
+          "items": {
+            "type": "string",
+            "pattern": "^\\.[a-zA-Z0-9]+$"
+          },
+          "description": "扫描的文件扩展名"
         },
         "max_file_size_mb": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 1000
+          "maximum": 1000,
+          "description": "最大文件大小限制(MB)"
         },
-        "ignore_hidden_files": {"type": "boolean"}
+        "ignore_hidden_files": {
+          "type": "boolean",
+          "description": "是否忽略隐藏文件"
+        }
       },
-      "required": ["paths", "file_extensions"]
+      "required": ["paths"],
+      "additionalProperties": false
     },
     "database": {
       "type": "object",
       "properties": {
-        "type": {"type": "string", "enum": ["sqlite"]},
-        "path": {"type": "string"},
-        "backup_enabled": {"type": "boolean"},
+        "type": {
+          "type": "string",
+          "enum": ["sqlite", "postgresql", "mysql"],
+          "description": "数据库类型"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "数据库路径或连接字符串"
+        },
+        "backup_enabled": {
+          "type": "boolean",
+          "description": "是否启用自动备份"
+        },
         "backup_interval_hours": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 1,
+          "maximum": 168,
+          "description": "备份间隔(小时)"
         },
-        "vacuum_on_startup": {"type": "boolean"}
+        "vacuum_on_startup": {
+          "type": "boolean",
+          "description": "启动时是否压缩数据库"
+        }
       },
-      "required": ["type", "path"]
+      "required": ["type", "path"],
+      "additionalProperties": false
     },
     "performance": {
       "type": "object",
@@ -56,50 +103,84 @@
         "max_workers": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 32
+          "maximum": 32,
+          "description": "最大工作线程数"
         },
         "batch_size": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 10,
+          "maximum": 1000,
+          "description": "批处理大小"
         },
         "memory_limit_mb": {
           "type": "integer",
-          "minimum": 128
+          "minimum": 128,
+          "maximum": 4096,
+          "description": "内存使用限制(MB)"
         },
-        "enable_async_io": {"type": "boolean"},
+        "enable_async_io": {
+          "type": "boolean",
+          "description": "启用异步I/O"
+        },
         "cache_size_mb": {
           "type": "integer",
-          "minimum": 32
+          "minimum": 32,
+          "maximum": 1024,
+          "description": "解析缓存大小(MB)"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "output": {
       "type": "object",
       "properties": {
         "verbosity": {
           "type": "string",
-          "enum": ["debug", "info", "warning", "error"]
+          "enum": ["debug", "info", "warning", "error", "critical"],
+          "description": "日志级别"
         },
-        "progress_bar": {"type": "boolean"},
-        "color_output": {"type": "boolean"},
+        "progress_bar": {
+          "type": "boolean",
+          "description": "显示进度条"
+        },
+        "color_output": {
+          "type": "boolean",
+          "description": "彩色输出"
+        },
         "export_formats": {
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["json", "csv", "dot", "html"]
-          }
+            "enum": ["json", "csv", "dot", "xml"]
+          },
+          "description": "支持的导出格式"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "features": {
       "type": "object",
       "properties": {
-        "detect_unused_assets": {"type": "boolean"},
-        "detect_circular_deps": {"type": "boolean"},
-        "generate_reports": {"type": "boolean"},
-        "web_interface": {"type": "boolean"}
-      }
+        "detect_unused_assets": {
+          "type": "boolean",
+          "description": "检测未使用资源"
+        },
+        "detect_circular_deps": {
+          "type": "boolean",
+          "description": "检测循环依赖"
+        },
+        "generate_reports": {
+          "type": "boolean",
+          "description": "生成报告"
+        },
+        "web_interface": {
+          "type": "boolean",
+          "description": "启用Web界面"
+        }
+      },
+      "additionalProperties": false
     }
   },
-  "required": ["project", "scan", "database"]
+  "required": ["project", "scan", "database"],
+  "additionalProperties": false
 }
