@@ -1,0 +1,6 @@
+fileFormatVersion: 2
+guid: invalid-guid-format
+TextureImporter:
+  # 无效的YAML文件，缺少必要的字段
+  internalIDToNameTable: []
+  externalObjects: {}
