@@ -936,6 +936,41 @@ class DependencyQueryEngine(DependencyQueryMixin, ReferenceQueryMixin):
             nx.DiGraph: NetworkX有向图
         """
         return self._graph
+    
+    # 增量更新管理器集成
+    def create_update_manager(self):
+        """创建图更新管理器实例
+        
+        Returns:
+            GraphUpdateManager: 更新管理器实例
+        """
+        from .graph_update_manager import GraphUpdateManager
+        return GraphUpdateManager(self)
+    
+    def create_file_change_updater(self, file_change_detector=None):
+        """创建基于文件变更的图更新器
+        
+        Args:
+            file_change_detector: 文件变更检测器实例
+            
+        Returns:
+            FileChangeGraphUpdater: 文件变更图更新器实例
+        """
+        from .graph_update_manager import FileChangeGraphUpdater
+        update_manager = self.create_update_manager()
+        return FileChangeGraphUpdater(update_manager, file_change_detector)
+    
+    def batch_update_from_changes(self, changes: Dict[str, Any]):
+        """从文件变更批量更新图
+        
+        Args:
+            changes: 文件变更信息
+            
+        Returns:
+            Dict[str, Any]: 更新结果
+        """
+        file_updater = self.create_file_change_updater()
+        return file_updater.process_file_changes(changes)
 
 
 # 保持向后兼容性的导出
