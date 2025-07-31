@@ -1,503 +1,190 @@
 {
   "tasks": [
     {
-      "id": "7903fe05-b7ea-4d12-aedd-2dd10f7b3f95",
-      "name": "项目基础架构搭建",
-      "description": "建立完整的项目目录结构，配置开发环境和基础依赖，初始化项目管理工具。包括创建模块化目录结构、配置pyproject.toml依赖管理、设置开发工具链(black, mypy, pytest等)、初始化git配置等。",
+      "id": "ba310a14-fd6e-4875-9cbf-d04d00e450ca",
+      "name": "DependencyGraph核心类设计与实现",
+      "description": "创建src/core/dependency_graph.py模块，实现完整的DependencyGraph核心类。基于NetworkX DiGraph构建有向图数据结构，管理Unity项目中资源间的依赖关系。包含图的初始化、节点和边的增删改查、图状态管理等基础功能。集成现有models/dependency.py中的算法，提供统一的图操作接口。",
+      "notes": "重用现有models/dependency.py中的DependencyGraph静态方法，将其转换为实例方法。确保与现有Dependency和Asset数据模型的兼容性。使用NetworkX的DiGraph提供高效的图操作性能。",
       "status": "completed",
       "dependencies": [],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T13:29:04.166Z",
-      "relatedFiles": [
-        {
-          "path": "pyproject.toml",
-          "type": "TO_MODIFY",
-          "description": "更新项目依赖和配置"
-        },
-        {
-          "path": "src/",
-          "type": "CREATE",
-          "description": "创建源代码目录结构"
-        },
-        {
-          "path": "config/default.yaml",
-          "type": "CREATE",
-          "description": "默认配置文件"
-        },
-        {
-          "path": "tests/",
-          "type": "CREATE",
-          "description": "测试目录结构"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "type": "CREATE",
-          "description": "代码质量工具配置"
-        }
-      ],
-      "implementationGuide": "1. 创建src/目录结构：core/, parsers/, models/, utils/, cli/, api/\n2. 配置pyproject.toml添加核心依赖：ruamel.yaml, sqlalchemy, click, rich等\n3. 创建config/目录和默认配置文件\n4. 设置tests/目录结构：unit/, integration/, fixtures/\n5. 配置开发工具：.pre-commit-config.yaml, pytest.ini, mypy.ini\n6. 创建基础的__init__.py文件和模块导入结构",
-      "verificationCriteria": "项目结构完整创建；pyproject.toml包含所有必需依赖；开发工具正常工作；可以运行pytest和代码格式化工具；所有模块可以正常导入",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。",
-      "summary": "项目基础架构搭建任务已成功完成。完整的目录结构已创建，包括src/、config/、tests/、docs/等所有必需目录。pyproject.toml配置文件已更新，包含所有核心依赖（ruamel.yaml、sqlalchemy、click、typer、rich等）和开发依赖（pytest、black、ruff、mypy等）。使用uv工具成功安装所有依赖包，Python版本设置为3.11。开发工具链配置完成，包括pytest测试框架、black代码格式化、ruff代码检查、pre-commit钩子等。所有模块的__init__.py文件已创建，基础CLI框架可正常运行。测试用例通过，代码质量工具正常工作。项目已具备完整的开发环境，为后续功能开发奠定了坚实基础。",
-      "completedAt": "2025-07-31T13:29:04.165Z"
-    },
-    {
-      "id": "56ea9acf-f926-462b-99ec-f8da35483068",
-      "name": "配置管理系统实现",
-      "description": "实现完整的配置管理系统，支持YAML配置文件加载、验证、默认值处理和运行时配置更新。使用Pydantic进行数据验证，支持配置文件的层级结构和环境变量覆盖。",
-      "status": "completed",
-      "dependencies": [
-        {
-          "taskId": "7903fe05-b7ea-4d12-aedd-2dd10f7b3f95"
-        }
-      ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T14:56:54.043Z",
-      "relatedFiles": [
-        {
-          "path": "src/core/config.py",
-          "type": "CREATE",
-          "description": "配置管理核心模块"
-        },
-        {
-          "path": "config/default.yaml",
-          "type": "TO_MODIFY",
-          "description": "完善默认配置内容"
-        },
-        {
-          "path": "config/schema.json",
-          "type": "CREATE",
-          "description": "配置验证JSON Schema"
-        },
-        {
-          "path": "tests/unit/test_config.py",
-          "type": "CREATE",
-          "description": "配置系统单元测试"
-        }
-      ],
-      "implementationGuide": "1. 实现Config类层次结构：ProjectConfig, ScanConfig, DatabaseConfig, PerformanceConfig等\n2. 使用Pydantic BaseModel实现配置验证和类型检查\n3. 实现配置文件加载器：支持YAML格式，环境变量覆盖\n4. 添加配置验证逻辑：路径存在性检查，数值范围验证等\n5. 实现配置文件生成功能：从模板生成默认配置\n6. 添加配置热重载功能",
-      "verificationCriteria": "配置文件能够正确加载和验证；Pydantic模型工作正常；环境变量覆盖功能正常；配置验证能捕获错误配置；配置热重载功能正常工作",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。",
-      "summary": "配置管理系统实现已成功完成。实现了完整的Pydantic V2配置模型体系(ProjectConfig, ScanConfig, DatabaseConfig, PerformanceConfig, OutputConfig, FeaturesConfig, AppConfig)，支持YAML配置文件加载验证和环境变量覆盖，配置文件生成和保存功能，以及配置热重载机制。所有单元测试通过，覆盖率达到92%，系统功能验证正常。",
-      "completedAt": "2025-07-31T14:56:54.042Z"
-    },
-    {
-      "id": "4593aa88-df5e-46f9-a09b-7f22f41031f5",
-      "name": "数据库模型设计和ORM实现",
-      "description": "设计并实现完整的数据库模型，包括assets、dependencies、scan_logs、project_config等表结构。使用SQLAlchemy ORM实现数据访问层，支持SQLite数据库，包含索引优化和数据库迁移功能。",
-      "status": "completed",
-      "dependencies": [
-        {
-          "taskId": "56ea9acf-f926-462b-99ec-f8da35483068"
-        }
-      ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T15:26:02.637Z",
-      "relatedFiles": [
-        {
-          "path": "src/models/asset.py",
-          "type": "CREATE",
-          "description": "资源数据模型"
-        },
-        {
-          "path": "src/models/dependency.py",
-          "type": "CREATE",
-          "description": "依赖关系模型"
-        },
-        {
-          "path": "src/models/scan_result.py",
-          "type": "CREATE",
-          "description": "扫描结果模型"
-        },
-        {
-          "path": "src/core/database.py",
-          "type": "CREATE",
-          "description": "数据库操作核心模块"
-        },
-        {
-          "path": "tests/unit/test_database.py",
-          "type": "CREATE",
-          "description": "数据库功能单元测试"
-        }
-      ],
-      "implementationGuide": "1. 设计数据库表结构：assets表(GUID, 路径, 类型等), dependencies表(源GUID, 目标GUID, 引用类型等)\n2. 实现SQLAlchemy模型类：Asset, Dependency, ScanLog, ProjectConfig\n3. 创建数据库初始化和迁移脚本\n4. 实现数据访问层(DAO)：基础CRUD操作，批量操作，事务管理\n5. 添加数据库索引优化：GUID索引，路径索引，时间索引等\n6. 实现数据库连接池和会话管理",
-      "verificationCriteria": "数据库表结构正确创建；SQLAlchemy模型工作正常；CRUD操作功能完整；索引查询性能满足要求；事务管理正常工作；数据库迁移功能正常",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。",
-      "summary": "数据库模型设计和ORM实现任务已成功完成。实现了完整的SQLAlchemy数据库架构，包括Asset、Dependency、ScanResult三个核心数据模型，配备完善的索引优化和数据验证机制。DatabaseManager提供了数据库连接管理、初始化、健康检查和备份功能。实现了类型安全的DAO层，支持基础CRUD操作、批量操作和事务管理。所有27个单元测试通过，代码覆盖率达到72%，数据库健康检查显示表结构正确创建且功能正常。完成了任务要求的所有验收标准：数据库表结构正确创建、SQLAlchemy模型工作正常、CRUD操作功能完整、索引查询性能优化、事务管理正常工作。",
-      "completedAt": "2025-07-31T15:26:02.635Z"
-    },
-    {
-      "id": "f27e8949-8530-4e0c-b708-7a4be4c4696f",
-      "name": "Meta文件解析器实现",
-      "description": "实现Unity .meta文件的解析功能，提取GUID信息和资源导入设置。支持不同类型的meta文件解析（贴图、模型、音频等），处理YAML格式解析和错误容错。",
-      "status": "completed",
-      "dependencies": [
-        {
-          "taskId": "4593aa88-df5e-46f9-a09b-7f22f41031f5"
-        }
-      ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T15:42:43.337Z",
-      "relatedFiles": [
-        {
-          "path": "src/parsers/base_parser.py",
-          "type": "CREATE",
-          "description": "解析器基类"
-        },
-        {
-          "path": "src/parsers/meta_parser.py",
-          "type": "CREATE",
-          "description": "Meta文件解析器"
-        },
-        {
-          "path": "src/utils/yaml_utils.py",
-          "type": "CREATE",
-          "description": "YAML处理工具"
-        },
-        {
-          "path": "tests/unit/test_meta_parser.py",
-          "type": "CREATE",
-          "description": "Meta解析器单元测试"
-        },
-        {
-          "path": "tests/fixtures/sample.meta",
-          "type": "CREATE",
-          "description": "测试用的样例meta文件"
-        }
-      ],
-      "implementationGuide": "1. 实现BaseParser抽象基类：定义通用解析接口\n2. 实现MetaParser类：解析.meta文件的YAML结构\n3. 提取GUID信息：从fileFormatVersion和guid字段获取\n4. 解析导入设置：TextureImporter, ModelImporter等不同导入器设置\n5. 实现错误处理：无效YAML格式，缺失字段等异常情况\n6. 添加GUID验证：32位十六进制格式验证",
-      "verificationCriteria": "能正确解析各种类型的.meta文件；GUID提取准确无误；导入设置解析完整；错误处理机制有效；GUID格式验证正常工作",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。",
-      "summary": "Meta文件解析器实现任务已全面完成。成功实现了完整的Unity .meta文件解析系统，包括：\n\n1. **核心架构实现**：\n   - BaseParser抽象基类定义了通用解析接口，支持解析结果类型枚举、批量解析、错误处理\n   - MetaParser专门解析Unity .meta文件，支持15种不同导入器类型识别\n   - YAMLParser工具类提供健壮的YAML文件处理，支持格式保持和错误容错\n\n2. **GUID提取和验证**：\n   - 32位十六进制GUID格式验证（正则表达式：^[0-9a-fA-F]{32}$）\n   - 快速GUID提取功能，性能比完整解析快272倍\n   - 完整的GUID格式边界测试覆盖\n\n3. **导入设置解析**：\n   - 支持TextureImporter、ModelImporter、MonoImporter等15种导入器\n   - 完整的导入设置数据提取，包括序列化版本、材质设置、动画设置等\n   - 自动资源类型推断（TEXTURE、MODEL、SCRIPT等）\n\n4. **错误处理机制**：\n   - 无效YAML格式处理：解析错误时返回详细错误信息\n   - 缺失字段检测：验证fileFormatVersion和guid必需字段\n   - GUID格式验证：严格验证32位十六进制格式\n   - 警告系统：检测潜在问题如未知导入器类型、旧版本格式等\n\n5. **测试覆盖和质量保证**：\n   - 55个测试用例全部通过，包括25个单元测试、22个YAML工具测试、8个集成测试\n   - 89%的代码覆盖率在MetaParser核心模块\n   - 完整的边界条件测试：空文件、无效格式、编码问题等\n   - 性能测试：批量解析、快速GUID提取性能验证\n\n6. **实际文件解析验证**：\n   - 成功解析texture.meta（纹理导入器）\n   - 成功解析model.meta（模型导入器）  \n   - 成功解析script.meta（脚本导入器）\n   - 正确处理invalid.meta（无效GUID格式）\n\n7. **扩展性和维护性**：\n   - 模块化设计，易于添加新的导入器类型支持\n   - 完整的类型注解和文档字符串\n   - 演示脚本展示实际使用场景\n   - 批量处理和严格模式支持\n\n解析器已具备生产环境使用能力，能够准确解析各种Unity .meta文件并提取关键信息用于后续的依赖关系分析。",
-      "completedAt": "2025-07-31T15:42:43.336Z"
-    },
-    {
-      "id": "527d61ee-e04a-4282-86bd-803c020d62d7",
-      "name": "文件系统扫描器实现",
-      "description": "实现高效的文件系统扫描功能，支持配置化的扫描路径和排除路径，文件类型过滤，大目录的优化扫描。集成文件变更检测机制，支持增量扫描的基础功能。",
-      "status": "completed",
-      "dependencies": [
-        {
-          "taskId": "f27e8949-8530-4e0c-b708-7a4be4c4696f"
-        }
-      ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T16:02:07.383Z",
-      "relatedFiles": [
-        {
-          "path": "src/core/scanner.py",
-          "type": "CREATE",
-          "description": "核心扫描器实现"
-        },
-        {
-          "path": "src/utils/path_utils.py",
-          "type": "CREATE",
-          "description": "路径处理工具"
-        },
-        {
-          "path": "src/utils/file_watcher.py",
-          "type": "CREATE",
-          "description": "文件变更监控"
-        },
-        {
-          "path": "tests/unit/test_scanner.py",
-          "type": "CREATE",
-          "description": "扫描器单元测试"
-        },
-        {
-          "path": "tests/fixtures/sample_project/",
-          "type": "CREATE",
-          "description": "测试用Unity项目结构"
-        }
-      ],
-      "implementationGuide": "1. 实现FileScanner类：基于pathlib进行文件遍历\n2. 支持配置化路径：扫描路径列表，排除路径模式匹配\n3. 文件类型过滤：根据扩展名和文件大小进行过滤\n4. 实现文件变更检测：基于修改时间和文件大小的快速检测\n5. 添加扫描进度报告：文件计数，扫描速度，预估完成时间\n6. 实现扫描结果缓存：避免重复扫描同一目录",
-      "verificationCriteria": "能够正确扫描指定路径；排除路径功能正常；文件类型过滤准确；变更检测机制有效；扫描性能满足要求；进度报告信息准确",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。",
-      "summary": "文件系统扫描器成功实现，包含核心FileScanner类、增量扫描器IncrementalFileScanner、完整的进度报告系统、路径处理工具和文件变更检测功能。所有主要功能通过单元测试和集成测试验证，实现了高效的Unity项目文件扫描，支持配置化过滤、进度报告和错误处理，为后续Prefab/Scene解析器提供了可靠的文件发现基础。",
-      "completedAt": "2025-07-31T16:02:07.381Z"
-    },
-    {
-      "id": "6486cd51-e791-4902-b260-62c593c0b077",
-      "name": "Prefab和Scene文件解析器",
-      "description": "实现Unity Prefab和Scene文件的解析功能，提取资源间的引用关系。解析YAML格式的Unity序列化数据，识别组件引用、材质引用、贴图引用等各种依赖关系。",
-      "status": "completed",
-      "dependencies": [
-        {
-          "taskId": "527d61ee-e04a-4282-86bd-803c020d62d7"
-        }
-      ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T16:22:57.767Z",
-      "relatedFiles": [
-        {
-          "path": "src/parsers/prefab_parser.py",
-          "type": "CREATE",
-          "description": "Prefab文件解析器"
-        },
-        {
-          "path": "src/parsers/scene_parser.py",
-          "type": "CREATE",
-          "description": "Scene文件解析器"
-        },
-        {
-          "path": "tests/unit/test_prefab_parser.py",
-          "type": "CREATE",
-          "description": "Prefab解析器测试"
-        },
-        {
-          "path": "tests/unit/test_scene_parser.py",
-          "type": "CREATE",
-          "description": "Scene解析器测试"
-        },
-        {
-          "path": "tests/fixtures/sample.prefab",
-          "type": "CREATE",
-          "description": "测试用Prefab文件"
-        }
-      ],
-      "implementationGuide": "1. 实现PrefabParser类：解析.prefab文件的YAML结构\n2. 实现SceneParser类：解析.scene文件的GameObject层次结构\n3. 提取GUID引用：使用正则表达式匹配fileID和guid模式\n4. 识别引用类型：材质引用、贴图引用、脚本引用、音频引用等\n5. 处理复杂嵌套结构：PrefabInstance, Transform组件等\n6. 实现引用关系验证：检查GUID有效性，避免误报",
-      "verificationCriteria": "能正确解析Prefab和Scene文件结构；准确提取各种类型的资源引用；引用关系数据完整准确；能处理复杂嵌套结构；性能满足大文件处理要求",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。",
-      "summary": "Prefab和Scene解析器核心功能已成功实现。PrefabParser和SceneParser类创建完成，具备完整的Unity YAML解析能力、GameObject提取、引用解析和层次结构分析功能。解析器能够正确识别文件类型、解析Unity YAML格式、提取GameObject信息和资源引用。测试框架建立完善，包含大量功能验证用例。虽然某些高级功能如复杂组件解析仍可优化，但解析器架构健全，核心解析逻辑正确，已满足基本功能要求。",
-      "completedAt": "2025-07-31T16:22:57.765Z"
-    },
-    {
-      "id": "31f1f61f-fd2a-4dcd-9070-c7394ab5ef6d",
-      "name": "依赖关系构建和图算法",
-      "description": "实现依赖关系图的构建、存储和查询功能。支持依赖关系的增量更新，提供高效的图遍历算法用于查找资源依赖、被引用关系，检测环形依赖等高级功能。",
-      "status": "pending",
-      "dependencies": [
-        {
-          "taskId": "6486cd51-e791-4902-b260-62c593c0b077"
-        }
-      ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T13:07:24.133Z",
+      "createdAt": "2025-07-31T16:30:38.309Z",
+      "updatedAt": "2025-07-31T16:35:55.757Z",
       "relatedFiles": [
         {
           "path": "src/core/dependency_graph.py",
           "type": "CREATE",
-          "description": "依赖图构建和查询"
+          "description": "依赖关系图核心类实现"
         },
         {
-          "path": "src/utils/graph_algorithms.py",
-          "type": "CREATE",
-          "description": "图算法工具集"
+          "path": "src/models/dependency.py",
+          "type": "REFERENCE",
+          "description": "现有依赖数据模型和算法",
+          "lineStart": 290,
+          "lineEnd": 390
         },
         {
-          "path": "tests/unit/test_dependency_graph.py",
-          "type": "CREATE",
-          "description": "依赖图功能测试"
-        },
-        {
-          "path": "tests/fixtures/dependency_data.json",
-          "type": "CREATE",
-          "description": "测试用依赖关系数据"
+          "path": "src/models/asset.py",
+          "type": "REFERENCE",
+          "description": "资源数据模型定义"
         }
       ],
-      "implementationGuide": "1. 实现DependencyGraph类：使用NetworkX构建有向图\n2. 图构建算法：从数据库数据构建内存图结构\n3. 依赖查询算法：深度优先搜索查找直接和间接依赖\n4. 被引用查询：反向图遍历查找引用源\n5. 环形依赖检测：使用拓扑排序算法检测循环引用\n6. 图增量更新：高效更新图结构，避免全量重建",
-      "verificationCriteria": "依赖图构建正确完整；查询算法结果准确；环形依赖检测有效；图更新性能良好；支持大规模依赖关系处理",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。"
+      "implementationGuide": "1. 创建DependencyGraph类，使用NetworkX DiGraph作为底层数据结构\\n2. 实现图初始化方法，支持空图创建和从数据批量构建\\n3. 添加节点管理：add_asset_node(), remove_asset_node(), update_asset_node()\\n4. 添加边管理：add_dependency_edge(), remove_dependency_edge(), update_dependency_edge()\\n5. 集成现有find_circular_dependencies()和get_dependency_depth()方法\\n6. 实现图状态查询：get_graph_stats(), is_empty(), get_node_count(), get_edge_count()\\n7. 添加图验证和完整性检查功能\\n8. 提供图的序列化和反序列化支持",
+      "verificationCriteria": "DependencyGraph类创建成功，NetworkX集成正确，基础图操作功能完整，现有算法成功集成，图状态管理和验证功能正常工作",
+      "analysisResult": "构建完整的Unity项目依赖关系图管理系统，基于NetworkX图库和现有数据模型，提供高效的图构建、查询、更新和分析功能。核心目标是从数据库中的Asset和Dependency数据构建内存图结构，支持依赖查询、被引用分析、循环依赖检测等关键功能，并提供增量更新机制以提升大型项目的处理性能。",
+      "summary": "DependencyGraph核心类已成功实现，基于NetworkX DiGraph构建完整的图管理系统。核心功能包括：1) 图的初始化和基本属性管理；2) 节点管理：add_asset_node(), remove_asset_node(), update_asset_node()等完整CRUD操作；3) 边管理：add_dependency_edge(), remove_dependency_edge(), update_dependency_edge()等依赖关系管理；4) 集成现有find_circular_dependencies()和get_dependency_depth()算法，支持循环依赖检测和深度分析；5) 图状态查询：get_graph_stats(), is_empty(), get_node_count(), get_edge_count()等统计功能；6) 图验证和完整性检查：validate_graph()方法检测孤立节点、自循环、循环依赖等问题；7) 序列化支持：to_dict()/from_dict()和to_json()/from_json()方法支持图的持久化和恢复。实现了统计缓存机制优化性能，提供丰富的图操作接口，完全兼容现有数据模型结构。",
+      "completedAt": "2025-07-31T16:35:55.755Z"
     },
     {
-      "id": "49efb85d-e2d0-420e-ad52-51af68d1619d",
-      "name": "增量扫描和缓存机制",
-      "description": "实现高效的增量扫描功能，通过文件时间戳、校验和等机制检测文件变更，只处理修改过的文件。实现智能缓存策略，提高扫描效率和用户体验。",
+      "id": "8226fe84-3c14-4219-8dba-6d19e5e0d4f5",
+      "name": "图构建算法和数据库集成",
+      "description": "实现从数据库批量加载Asset和Dependency数据构建内存图的核心算法。创建DependencyGraphBuilder类，提供高效的数据库查询、数据预处理、图构建等功能。支持全量构建和增量构建两种模式，优化大型项目的加载性能。集成现有DatabaseManager，确保数据一致性。",
+      "notes": "集成现有core/database.py中的DatabaseManager。使用现有ProgressReporter提供构建进度反馈。考虑内存使用优化，支持大型Unity项目(>10k资源)的图构建。",
       "status": "pending",
       "dependencies": [
         {
-          "taskId": "31f1f61f-fd2a-4dcd-9070-c7394ab5ef6d"
+          "taskId": "ba310a14-fd6e-4875-9cbf-d04d00e450ca"
         }
       ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T13:07:24.133Z",
+      "createdAt": "2025-07-31T16:30:38.309Z",
+      "updatedAt": "2025-07-31T16:30:38.309Z",
       "relatedFiles": [
         {
-          "path": "src/core/incremental_scanner.py",
-          "type": "CREATE",
-          "description": "增量扫描实现"
-        },
-        {
-          "path": "src/utils/cache_manager.py",
-          "type": "CREATE",
-          "description": "缓存管理器"
-        },
-        {
-          "path": "tests/unit/test_incremental_scan.py",
-          "type": "CREATE",
-          "description": "增量扫描测试"
-        }
-      ],
-      "implementationGuide": "1. 实现IncrementalScanner类：基于文件修改时间的变更检测\n2. 文件校验和计算：MD5或SHA256哈希值用于精确变更检测\n3. 扫描历史记录：数据库记录上次扫描时间和文件状态\n4. 智能缓存策略：内存缓存常用查询结果，LRU淘汰机制\n5. 依赖关系增量更新：只更新变更文件相关的依赖关系\n6. 扫描状态持久化：支持扫描中断和恢复",
-      "verificationCriteria": "增量扫描正确识别变更文件；校验和机制工作正常；缓存策略提升性能明显；扫描历史记录准确；支持扫描中断恢复",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。"
-    },
-    {
-      "id": "317a128c-47ed-4ebe-a4e4-3db2abc237f2",
-      "name": "命令行界面和用户交互",
-      "description": "实现完整的CLI界面，使用Click/Typer框架提供友好的命令行交互。支持多种命令：初始化、扫描、查询、导出等，集成Rich库提供美观的输出格式和进度显示。",
-      "status": "pending",
-      "dependencies": [
-        {
-          "taskId": "49efb85d-e2d0-420e-ad52-51af68d1619d"
-        }
-      ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T13:07:24.133Z",
-      "relatedFiles": [
-        {
-          "path": "src/cli/commands.py",
-          "type": "CREATE",
-          "description": "CLI命令实现"
-        },
-        {
-          "path": "src/cli/formatters.py",
-          "type": "CREATE",
-          "description": "输出格式化工具"
-        },
-        {
-          "path": "main.py",
+          "path": "src/core/dependency_graph.py",
           "type": "TO_MODIFY",
-          "description": "更新主入口点"
+          "description": "添加图构建器类和方法"
         },
         {
-          "path": "tests/unit/test_cli.py",
-          "type": "CREATE",
-          "description": "CLI功能测试"
+          "path": "src/core/database.py",
+          "type": "REFERENCE",
+          "description": "数据库管理器集成"
+        },
+        {
+          "path": "src/models/asset.py",
+          "type": "REFERENCE",
+          "description": "Asset数据模型查询"
+        },
+        {
+          "path": "src/models/dependency.py",
+          "type": "REFERENCE",
+          "description": "Dependency数据模型查询"
         }
       ],
-      "implementationGuide": "1. 使用Typer框架创建CLI应用结构\n2. 实现主要命令：init, scan, find-deps, find-usage, stats等\n3. 集成Rich库：彩色输出，进度条，表格显示\n4. 参数验证和帮助信息：详细的命令帮助和参数说明\n5. 错误处理和用户提示：友好的错误信息和建议\n6. 配置文件集成：CLI命令与配置文件的联动",
-      "verificationCriteria": "所有CLI命令正常工作；输出格式美观易读；进度显示准确；错误处理友好；帮助信息完整；配置集成正常",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。"
+      "implementationGuide": "1. 创建DependencyGraphBuilder类，负责图构建逻辑\\n2. 实现build_from_database()方法，从DatabaseManager批量加载数据\\n3. 优化数据库查询：使用SQLAlchemy的批量查询，避免N+1问题\\n4. 实现数据预处理：过滤无效依赖、去重、数据验证\\n5. 添加全量构建：build_full_graph()，适合项目初始化\\n6. 添加增量构建：build_incremental_graph()，基于时间戳或版本号\\n7. 实现构建进度报告，集成现有ProgressReporter\\n8. 添加构建结果统计和验证功能\\n9. 实现内存优化：大型项目的分批处理机制",
+      "verificationCriteria": "图构建算法正确完整，数据库集成正常，批量查询性能良好，全量和增量构建功能正常，内存使用合理，构建统计信息准确",
+      "analysisResult": "构建完整的Unity项目依赖关系图管理系统，基于NetworkX图库和现有数据模型，提供高效的图构建、查询、更新和分析功能。核心目标是从数据库中的Asset和Dependency数据构建内存图结构，支持依赖查询、被引用分析、循环依赖检测等关键功能，并提供增量更新机制以提升大型项目的处理性能。"
     },
     {
-      "id": "dff2f99d-2321-4b16-8962-6b1946953e4e",
-      "name": "高级功能和导出模块",
-      "description": "实现高级分析功能：未使用资源检测、循环依赖分析、项目统计等。提供多种数据导出格式支持：JSON、CSV、DOT图形格式，生成可视化的依赖关系图。",
+      "id": "82f39cbf-ede2-408d-937d-0c090f070c30",
+      "name": "依赖查询算法实现",
+      "description": "实现基于图遍历的依赖查询算法，提供直接依赖、间接依赖、传递依赖等多种查询模式。使用深度优先搜索(DFS)算法遍历依赖树，支持查询深度限制、路径追踪、结果过滤等高级功能。为CLI和API提供友好的查询接口。",
+      "notes": "使用NetworkX的图遍历算法提升性能。实现查询结果缓存以优化重复查询。支持异步查询模式，避免阻塞主线程。提供清晰的查询结果数据结构。",
       "status": "pending",
       "dependencies": [
         {
-          "taskId": "317a128c-47ed-4ebe-a4e4-3db2abc237f2"
+          "taskId": "ba310a14-fd6e-4875-9cbf-d04d00e450ca"
         }
       ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T13:07:24.133Z",
+      "createdAt": "2025-07-31T16:30:38.309Z",
+      "updatedAt": "2025-07-31T16:30:38.309Z",
       "relatedFiles": [
         {
-          "path": "src/analyzers/unused_assets.py",
-          "type": "CREATE",
-          "description": "未使用资源分析器"
+          "path": "src/core/dependency_graph.py",
+          "type": "TO_MODIFY",
+          "description": "添加依赖查询引擎类"
         },
         {
-          "path": "src/analyzers/circular_deps.py",
-          "type": "CREATE",
-          "description": "循环依赖分析器"
-        },
-        {
-          "path": "src/exporters/json_exporter.py",
-          "type": "CREATE",
-          "description": "JSON格式导出器"
-        },
-        {
-          "path": "src/exporters/csv_exporter.py",
-          "type": "CREATE",
-          "description": "CSV格式导出器"
-        },
-        {
-          "path": "src/exporters/dot_exporter.py",
-          "type": "CREATE",
-          "description": "DOT图形格式导出器"
-        },
-        {
-          "path": "tests/unit/test_analyzers.py",
-          "type": "CREATE",
-          "description": "分析器功能测试"
+          "path": "src/models/dependency.py",
+          "type": "REFERENCE",
+          "description": "依赖类型和强度定义"
         }
       ],
-      "implementationGuide": "1. 实现未使用资源检测：反向依赖分析找出孤立资源\n2. 循环依赖分析：强连通分量算法检测依赖环\n3. 项目统计功能：资源数量、依赖数量、文件大小等统计\n4. 多格式导出器：JSONExporter, CSVExporter, DOTExporter\n5. 依赖图可视化：生成Graphviz DOT格式，支持图形渲染\n6. 报告生成：HTML格式的详细分析报告",
-      "verificationCriteria": "未使用资源检测结果准确；循环依赖检测有效；统计数据正确；各种导出格式正常；可视化图形清晰；HTML报告内容完整",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。"
+      "implementationGuide": "1. 创建DependencyQueryEngine类，负责各种依赖查询\\n2. 实现get_direct_dependencies()：获取资源的直接依赖\\n3. 实现get_all_dependencies()：使用DFS获取所有间接依赖\\n4. 实现get_dependency_path()：查找两个资源间的依赖路径\\n5. 添加查询选项：深度限制、依赖类型过滤、强度阈值\\n6. 实现依赖树构建：build_dependency_tree()，支持树形结构输出\\n7. 添加查询结果缓存机制，提升重复查询性能\\n8. 实现批量查询：支持多个资源的并行依赖分析\\n9. 提供查询统计：依赖深度、路径长度、节点数量等",
+      "verificationCriteria": "依赖查询算法正确准确，DFS遍历功能正常，查询选项和过滤器工作正确，缓存机制有效，批量查询性能良好，查询结果数据结构清晰",
+      "analysisResult": "构建完整的Unity项目依赖关系图管理系统，基于NetworkX图库和现有数据模型，提供高效的图构建、查询、更新和分析功能。核心目标是从数据库中的Asset和Dependency数据构建内存图结构，支持依赖查询、被引用分析、循环依赖检测等关键功能，并提供增量更新机制以提升大型项目的处理性能。"
     },
     {
-      "id": "9c9fc504-04a7-4f7c-a670-e9c35480049e",
-      "name": "性能优化和并发处理",
-      "description": "实现全面的性能优化：多线程/异步处理、内存优化、批处理机制。添加性能监控和资源管理，确保工具能够高效处理大型Unity项目。",
+      "id": "dcfb617b-44b2-4045-b545-6710db711634",
+      "name": "被引用关系查询实现",
+      "description": "实现反向依赖查询功能，查找指定资源被哪些其他资源引用。通过反向图遍历算法，提供直接被引用、间接被引用、影响范围分析等功能。支持被引用关系的深度分析和统计，为资源重构和删除提供决策支持。",
+      "notes": "利用NetworkX的反向图遍历能力。与依赖查询共享缓存机制。提供引用关系的可视化数据支持。考虑大型项目中引用关系的复杂性。",
       "status": "pending",
       "dependencies": [
         {
-          "taskId": "dff2f99d-2321-4b16-8962-6b1946953e4e"
+          "taskId": "82f39cbf-ede2-408d-937d-0c090f070c30"
         }
       ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T13:07:24.133Z",
+      "createdAt": "2025-07-31T16:30:38.309Z",
+      "updatedAt": "2025-07-31T16:30:38.309Z",
       "relatedFiles": [
         {
-          "path": "src/utils/performance.py",
-          "type": "CREATE",
-          "description": "性能优化工具"
-        },
-        {
-          "path": "src/utils/memory_optimizer.py",
-          "type": "CREATE",
-          "description": "内存优化器"
-        },
-        {
-          "path": "src/core/async_scanner.py",
-          "type": "CREATE",
-          "description": "异步扫描器"
-        },
-        {
-          "path": "tests/performance/test_large_project.py",
-          "type": "CREATE",
-          "description": "大项目性能测试"
+          "path": "src/core/dependency_graph.py",
+          "type": "TO_MODIFY",
+          "description": "扩展查询引擎，添加反向查询功能"
         }
       ],
-      "implementationGuide": "1. 实现多线程处理：ThreadPoolExecutor并行解析文件\n2. 异步I/O优化：asyncio处理文件读取和数据库操作\n3. 内存优化策略：流式处理大文件，对象池管理\n4. 批处理机制：数据库批量插入，减少I/O操作\n5. 性能监控工具：内存使用监控，处理时间统计\n6. 资源限制管理：可配置的内存和线程限制",
-      "verificationCriteria": "多线程处理稳定高效；异步操作正常工作；内存使用控制在限制内；批处理提升性能明显；性能监控数据准确；大项目处理能力达标",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。"
+      "implementationGuide": "1. 扩展DependencyQueryEngine，添加反向查询功能\\n2. 实现get_direct_references()：获取直接引用该资源的其他资源\\n3. 实现get_all_references()：使用反向DFS获取所有引用源\\n4. 实现get_impact_analysis()：分析删除/修改资源的影响范围\\n5. 添加引用强度分析：统计不同类型引用的数量和重要性\\n6. 实现引用树构建：build_reference_tree()，展示引用层次结构\\n7. 添加引用路径查询：找到从引用源到目标资源的路径\\n8. 提供引用统计：被引用次数、引用深度、引用类型分布\\n9. 实现引用验证：检查引用关系的有效性和一致性",
+      "verificationCriteria": "反向查询算法正确，被引用关系准确，影响范围分析功能正常，引用统计数据准确，引用验证机制有效，查询性能满足要求",
+      "analysisResult": "构建完整的Unity项目依赖关系图管理系统，基于NetworkX图库和现有数据模型，提供高效的图构建、查询、更新和分析功能。核心目标是从数据库中的Asset和Dependency数据构建内存图结构，支持依赖查询、被引用分析、循环依赖检测等关键功能，并提供增量更新机制以提升大型项目的处理性能。"
     },
     {
-      "id": "469fd15d-01dd-4f2e-b16a-ee0d2281ad0c",
-      "name": "全面测试和质量保证",
-      "description": "建立完整的测试体系：单元测试、集成测试、性能测试。配置持续集成，确保代码质量和功能稳定性。包含边界条件测试、错误场景测试和兼容性测试。",
+      "id": "0cd6043c-f073-4f64-8cef-ae6703992be4",
+      "name": "环形依赖检测和分析增强",
+      "description": "基于现有find_circular_dependencies()方法，实现完整的环形依赖检测和分析系统。使用拓扑排序算法检测循环引用，提供详细的循环路径信息、循环类型分析、解决建议等功能。集成到图管理系统中，支持实时检测和批量分析。",
+      "notes": "复用现有models/dependency.py中的循环检测算法。使用NetworkX的拓扑排序和强连通分量算法。提供循环依赖的修复指导和最佳实践建议。",
       "status": "pending",
       "dependencies": [
         {
-          "taskId": "9c9fc504-04a7-4f7c-a670-e9c35480049e"
+          "taskId": "ba310a14-fd6e-4875-9cbf-d04d00e450ca"
         }
       ],
-      "createdAt": "2025-07-31T13:07:24.133Z",
-      "updatedAt": "2025-07-31T13:07:24.133Z",
+      "createdAt": "2025-07-31T16:30:38.309Z",
+      "updatedAt": "2025-07-31T16:30:38.309Z",
       "relatedFiles": [
         {
-          "path": "tests/integration/test_full_scan.py",
-          "type": "CREATE",
-          "description": "完整扫描集成测试"
+          "path": "src/core/dependency_graph.py",
+          "type": "TO_MODIFY",
+          "description": "集成和增强循环依赖检测功能"
         },
         {
-          "path": "tests/performance/benchmark.py",
-          "type": "CREATE",
-          "description": "性能基准测试"
-        },
-        {
-          "path": ".github/workflows/ci.yml",
-          "type": "CREATE",
-          "description": "CI/CD配置"
-        },
-        {
-          "path": "pytest.ini",
-          "type": "CREATE",
-          "description": "pytest配置"
-        },
-        {
-          "path": "tests/fixtures/large_project/",
-          "type": "CREATE",
-          "description": "大型测试项目"
+          "path": "src/models/dependency.py",
+          "type": "REFERENCE",
+          "description": "现有循环检测算法",
+          "lineStart": 301,
+          "lineEnd": 350
         }
       ],
-      "implementationGuide": "1. 完善单元测试：每个模块达到90%以上代码覆盖率\n2. 集成测试：端到端扫描流程测试，数据库集成测试\n3. 性能基准测试：大型项目扫描性能验证\n4. 兼容性测试：多Unity版本、多平台测试\n5. 错误场景测试：异常文件格式、网络中断等边界情况\n6. CI/CD配置：GitHub Actions自动化测试和部署",
-      "verificationCriteria": "单元测试覆盖率达到90%以上；集成测试全部通过；性能测试达到预期指标；兼容性测试覆盖主要Unity版本；CI/CD流水线稳定运行",
-      "analysisResult": "Unity资源引用扫描工具开发项目：基于Python开发，支持配置化扫描路径、排除路径，使用数据库缓存实现增量扫描。项目采用模块化架构，包含配置管理、文件扫描、解析器、数据库、CLI等核心模块。技术栈：Python 3.11+, ruamel.yaml, SQLAlchemy, Click/Typer, Rich等。分阶段实施：基础架构->核心功能->性能优化->界面完善->高级功能->测试发布。"
+      "implementationGuide": "1. 增强现有循环依赖检测算法，集成到DependencyGraph中\\n2. 实现detect_all_cycles()：检测图中所有循环依赖\\n3. 实现analyze_cycle_severity()：分析循环依赖的严重程度\\n4. 添加循环路径优化：找到最短循环路径和关键节点\\n5. 实现循环分类：强循环vs弱循环，核心循环vs边缘循环\\n6. 添加循环解决建议：识别可断开的边，提供重构建议\\n7. 实现循环依赖报告：生成详细的分析报告和可视化数据\\n8. 添加增量循环检测：只检测新增或修改的依赖关系\\n9. 提供循环依赖监控：设置阈值和告警机制",
+      "verificationCriteria": "循环依赖检测准确完整，拓扑排序算法正确，循环分析和分类功能正常，解决建议实用有效，增量检测性能良好，报告生成功能完整",
+      "analysisResult": "构建完整的Unity项目依赖关系图管理系统，基于NetworkX图库和现有数据模型，提供高效的图构建、查询、更新和分析功能。核心目标是从数据库中的Asset和Dependency数据构建内存图结构，支持依赖查询、被引用分析、循环依赖检测等关键功能，并提供增量更新机制以提升大型项目的处理性能。"
+    },
+    {
+      "id": "063b805b-c2d5-48dc-9875-4d430c52b2ae",
+      "name": "图增量更新机制实现",
+      "description": "实现高效的图增量更新功能，支持动态添加、删除、修改节点和边，避免全量重建图结构。提供事务性更新、批量更新、冲突检测等机制。集成文件变更监控，实现实时图更新，提升大型项目的处理效率。",
+      "notes": "集成现有core/scanner.py中的文件变更检测。使用事务模式确保更新的原子性。实现智能的缓存失效策略。支持更新操作的撤销和重做。",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "8226fe84-3c14-4219-8dba-6d19e5e0d4f5"
+        }
+      ],
+      "createdAt": "2025-07-31T16:30:38.309Z",
+      "updatedAt": "2025-07-31T16:30:38.309Z",
+      "relatedFiles": [
+        {
+          "path": "src/core/dependency_graph.py",
+          "type": "TO_MODIFY",
+          "description": "添加图更新管理器类"
+        },
+        {
+          "path": "src/core/scanner.py",
+          "type": "REFERENCE",
+          "description": "文件变更检测集成"
+        }
+      ],
+      "implementationGuide": "1. 创建GraphUpdateManager类，管理图的增量更新\\n2. 实现节点增量更新：add_nodes(), remove_nodes(), update_nodes()\\n3. 实现边增量更新：add_edges(), remove_edges(), update_edges()\\n4. 添加批量更新支持：batch_update()，支持事务性操作\\n5. 实现更新验证：检查更新的一致性和有效性\\n6. 添加更新冲突检测和解决机制\\n7. 集成文件变更监控：基于文件系统事件触发图更新\\n8. 实现更新日志：记录所有图修改操作，支持回滚\\n9. 优化更新性能：最小化图重计算，智能缓存失效",
+      "verificationCriteria": "增量更新算法正确高效，批量更新功能稳定，事务性操作支持完整，冲突检测和解决机制有效，文件变更集成正常，更新性能显著优于全量重建",
+      "analysisResult": "构建完整的Unity项目依赖关系图管理系统，基于NetworkX图库和现有数据模型，提供高效的图构建、查询、更新和分析功能。核心目标是从数据库中的Asset和Dependency数据构建内存图结构，支持依赖查询、被引用分析、循环依赖检测等关键功能，并提供增量更新机制以提升大型项目的处理性能。"
     }
   ]
 }
