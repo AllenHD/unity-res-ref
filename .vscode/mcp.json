@@ -9,7 +9,7 @@
                 "mcp-shrimp-task-manager"
             ],
             "env": {
-                "DATA_DIR": "${workspaceFolder}/.task-manager/data",
+                "DATA_DIR": "${workspaceFolder}/.task-manager",
                 "TEMPLATES_USE": "en",
                 "ENABLE_GUI": "false"
             }
